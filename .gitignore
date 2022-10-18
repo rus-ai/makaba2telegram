@@ -3,4 +3,6 @@
 /log/
 /db/
 /events/
+/.idea/
 /.env
+

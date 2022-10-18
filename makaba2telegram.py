@@ -67,7 +67,7 @@ def chan_request(board, thread):
 def media_request(file, path):
     url = f'{post_url}/{file}'
     try:
-        r = requests.get(url, cookies=board_cookies, timeout=5)
+        r = requests.get(url, timeout=5)
     except requests.exceptions.Timeout:
         logging.exception('HTTP connection timeout')
         return
@@ -228,20 +228,23 @@ def send_bot_log(_):
     do_all_jobs()
 
 
+def describe_command_handler(command_list, command_handler):
+    if isinstance(command_handler, CommandHandler):
+        for command in command_handler.command:
+            command_list.append(BotCommand(command=command,
+                                           description=command_description.get(command, 'Not described')))
+
+
 def set_command_helper():
     command_list = []
     dp.bot.delete_my_commands()
     for handler in dp.handlers.get(0):
+        describe_command_handler(command_list, handler)
         if isinstance(handler, CommandHandler):
-            for command in handler.command:
-                command_list.append(BotCommand(command=command,
-                                               description=command_description.get(command, 'Not described')))
+            describe_command_handler(command_list, handler)
         elif isinstance(handler, ConversationHandler):
             for entry in handler.entry_points:
-                if isinstance(entry, CommandHandler):
-                    for command in entry.command:
-                        command_list.append(BotCommand(command=command,
-                                                       description = command_description.get(command, 'Not described')))
+                describe_command_handler(command_list, entry)
     dp.bot.set_my_commands(command_list)
 
 
