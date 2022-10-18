@@ -30,3 +30,8 @@ enable_picture_preview = False
 post_link = re.compile(">>\\d{6}")
 post_url = 'https://2ch.hk'
 
+command_description = {"start": "Start this bot",
+                       "group": "Begin telegram group management dialog",
+                       "add": "Subscribe new thread to telegram group",
+                       "delete": "Unsubscribe thread from telegram group",
+                       }
