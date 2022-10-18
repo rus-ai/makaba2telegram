@@ -12,7 +12,7 @@ from telegram import Update
 from modules import command_thread_delete, command_group, command_thread_add
 from modules.bot_events import track_bot_chats, track_chat_members
 from modules.database import init_db, Posts, threads_cache, load_post_cache, posts_cache
-from modules.settings import BOT_TOKEN, BOT_LOG_CHAT_ID, enable_picture_preview, board_cookies, dir_media
+from modules.settings import BOT_TOKEN, BOT_LOG_CHAT_ID, enable_picture_preview, dir_media
 from modules.settings import sleep_time, post_link, post_url, dir_store, log_file, log_formatter
 
 
@@ -235,11 +235,11 @@ def start_telegram_bot():
     dp.add_handler(command_thread_delete.command_thread_delete_handler)
     dp.add_handler(ChatMemberHandler(track_bot_chats, ChatMemberHandler.MY_CHAT_MEMBER))
     dp.add_handler(ChatMemberHandler(track_chat_members, ChatMemberHandler.CHAT_MEMBER))
-    # for handler in dp.handlers.get(0):
-    #     if isinstance(handler, CommandHandler):
-    #         print(handler.command)
-    #    elif isinstance(handler, ConversationHandler):
-    #        print(handler.entry_points.command)
+    for handler in dp.handlers.get(0):
+        if isinstance(handler, CommandHandler):
+            print(handler.command)
+       # elif isinstance(handler, ConversationHandler):
+       #     print(handler.entry_points.command)
     jq.run_repeating(send_bot_log, interval=60, first=10)
     while True:
         try:

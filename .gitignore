@@ -1,0 +1,6 @@
+/store/
+/media/
+/log/
+/db/
+/events/
+/.env
