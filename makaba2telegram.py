@@ -32,9 +32,8 @@ def cleanhtml(raw_html):
     return cleantext
 
 
-def chan_request(board, thread):
+def thread_request(board, thread):
     url = f'{post_url}/{board}/res/{thread}.json'
-
     try:
         r = requests.get(url, timeout=5)
     except requests.exceptions.Timeout:
@@ -67,7 +66,7 @@ def chan_request(board, thread):
 def media_request(file, path):
     url = f'{post_url}/{file}'
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=300)
     except requests.exceptions.Timeout:
         logging.exception('HTTP connection timeout')
         return
@@ -116,7 +115,7 @@ def do_job_item(board, thread, chanel):
     thread_json = None
     try:
         logging.debug(f"Request... {str(board)} {str(thread)}")
-        thread_json = chan_request(str(board), str(thread))
+        thread_json = thread_request(str(board), str(thread))
     except requests.exceptions.ChunkedEncodingError:
         logging.exception("Chunk error")
         return
@@ -146,7 +145,6 @@ def do_job_item(board, thread, chanel):
                         for f in post.files:
                             count = count + 1
                             text += f' [{count}]({post_url}{f.path})'
-                            media_download(board, thread, str(post.num), f.path)
                         text += '\n'
                     post_date = post.date
 
@@ -183,6 +181,10 @@ def do_job_item(board, thread, chanel):
                         for thread_dict in threads_cache:
                             if thread_dict.get("thread") == thread and thread_dict.get("board") == board:
                                 thread_dict["last"] = f"{datetime.datetime.now():%y.%m.%d %H:%M:%S}"
+                    if post.files:
+                        for f in post.files:
+                            media_download(board, thread, str(post.num), f.path)
+
 
 
 def do_all_jobs():
@@ -215,8 +217,11 @@ def send_bot_log(_):
                 message_id=log_message.message_id,
                 text=text
             )
-        finally:
-            pass
+        except Exception as e:
+            logging.error(f"Editing log message failed: {repr(e)} {str(e)}")
+            if str(e) == "Message to edit not found":
+                logging.error("Next time will be created new log message")
+                log_message = None
     else:
         try:
             log_message = updater.bot.send_message(
