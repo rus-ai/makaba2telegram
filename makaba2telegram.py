@@ -12,7 +12,7 @@ from telegram import Update, BotCommand
 from modules import command_thread_delete, command_group, command_thread_add
 from modules.bot_events import track_bot_chats, track_chat_members
 from modules.database import init_db, Posts, threads_cache, load_post_cache, posts_cache
-from modules.settings import BOT_TOKEN, BOT_LOG_CHAT_ID, enable_picture_preview, dir_media, timeout_polling
+from modules.settings import BOT_TOKEN, BOT_LOG_CHAT_ID, enable_picture_preview, dir_media, timeout_polling, all_dirs
 from modules.settings import command_description, timeout_thread, timeout_media
 from modules.settings import sleep_time, post_link, post_url, dir_store, log_file, log_formatter
 
@@ -24,6 +24,12 @@ jq = updater.job_queue
 start_time = datetime.datetime.now()
 log_message = None
 message_count = 0
+
+
+def create_dirs():
+    for directory in all_dirs:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
 
 
 def cleanhtml(raw_html):
@@ -282,6 +288,7 @@ def start_telegram_bot():
 
 
 def main():
+    create_dirs()
     logging.basicConfig(filename=log_file, level=logging.WARNING, format=log_formatter)
     logging.warning("Program started")
     print("Program started")

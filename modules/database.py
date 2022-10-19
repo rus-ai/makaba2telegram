@@ -5,7 +5,7 @@ from modules.settings import dir_db
 
 posts_db = peewee.SqliteDatabase(os.path.join(dir_db, 'posts.db'))
 groups_db = peewee.SqliteDatabase(os.path.join(dir_db, 'groups.db'))
-threads_db = peewee.SqliteDatabase(os.path.join(dir_db, 'db', 'threads.db'))
+threads_db = peewee.SqliteDatabase(os.path.join(dir_db, 'threads.db'))
 
 threads_cache = []
 posts_cache = dict()

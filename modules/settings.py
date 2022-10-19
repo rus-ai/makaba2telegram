@@ -24,6 +24,8 @@ dir_media = os.path.join(dir_path, 'media')
 dir_log = os.path.join(dir_path, 'log')
 dir_db = os.path.join(dir_path, 'db')
 
+all_dirs = (dir_events, dir_store, dir_media, dir_log, dir_db)
+
 log_file = os.path.join(dir_log, 'events.log')
 events_bot_file = os.path.join(dir_events, 'bot.dict')
 events_user_file = os.path.join(dir_events, 'user.dict')
