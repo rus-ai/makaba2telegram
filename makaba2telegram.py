@@ -29,8 +29,14 @@ message_count = 0
 def cleanhtml(raw_html):
     clean_br = re.compile('<br/?>')
     clean_r = re.compile('<.*?>')
-    cleantext = re.sub(clean_r, '', re.sub(clean_br, '\n', raw_html))
-    return cleantext
+    cleantext = (re.sub(clean_r, '', re.sub(clean_br, '\n', raw_html)))\
+        .replace('&gt;', '>').replace('&lt;', '<') \
+        .replace("_", "\\_").replace("*", "\\*")\
+        .replace("[", "\\[").replace("`", "\\`") \
+        .replace("&#39;", "'").replace("&#92;", "\\").replace("&amp;", "&") \
+        .replace("&quot;", "\"").replace("&#47;", "/").replace("&#95;", "\\_") \
+        .replace("&#37;", "%")
+    return cleantext[:3500]
 
 
 def thread_request(board, thread):
