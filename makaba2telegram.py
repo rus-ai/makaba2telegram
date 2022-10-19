@@ -101,11 +101,13 @@ def media_request(file, path):
         local_file.write(r.content)
 
 
-def media_download(board, thread, post, file):
-    directory = os.path.join(dir_media, board, thread)
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    media_request(file, os.path.join(directory, f"{post}_{file.split('/')[-1]}"))
+def media_download(board, thread, post):
+    if post.files:
+        for file in post.files:
+            directory = os.path.join(dir_media, board, thread)
+            if not os.path.exists(directory):
+                os.makedirs(directory)
+            media_request(file, os.path.join(directory, f"{post}_{file.split('/')[-1]}"))
 
 
 def send_telegram(text: str, channel_id: str, no_preview: bool):
@@ -197,9 +199,7 @@ def do_job_item(board, thread, chanel):
                         for thread_dict in threads_cache:
                             if thread_dict.get("thread") == thread and thread_dict.get("board") == board:
                                 thread_dict["last"] = f"{datetime.datetime.now():%y.%m.%d %H:%M:%S}"
-                    if post.files:
-                        for f in post.files:
-                            media_download(board, thread, str(post.num), f.path)
+                    media_download(board, thread, post)
 
 
 def do_all_jobs():
