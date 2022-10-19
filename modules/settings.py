@@ -18,11 +18,16 @@ if str(BOT_LOG_CHAT_ID).lstrip("-").isdigit():
     BOT_LOG_CHAT_ID = int(BOT_LOG_CHAT_ID)
 
 dir_path = os.path.dirname(str(sys.modules['__main__'].__file__))
+dir_events = os.path.join(dir_path, 'events')
 dir_store = os.path.join(dir_path, 'store')
 dir_media = os.path.join(dir_path, 'media')
-log_file = os.path.join(dir_path, 'log', 'events.log')
-events_bot_file = os.path.join(dir_path, 'events', 'bot.dict')
-events_user_file = os.path.join(dir_path, 'events', 'user.dict')
+dir_log = os.path.join(dir_path, 'log')
+dir_db = os.path.join(dir_path, 'db')
+
+log_file = os.path.join(dir_log, 'events.log')
+events_bot_file = os.path.join(dir_events, 'bot.dict')
+events_user_file = os.path.join(dir_events, 'user.dict')
+
 log_formatter = "%(asctime)s - [%(levelname)s] - %(name)s - (%(filename)s).%(funcName)s(%(lineno)d) - %(message)s"
 
 sleep_time = 3  # 20 messages to group in minute
