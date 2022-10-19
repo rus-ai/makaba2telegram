@@ -169,11 +169,7 @@ def do_job_item(board, thread, chanel):
                     with open(os.path.join(dir_store, f"{post.num}.html"), "w", encoding="utf-8") as f:
                         f.write(post.comment)
 
-                    post_body = cleanhtml(post.comment)[:3500].replace('&gt;', '>').replace('&lt;', '<') \
-                        .replace("_", "\\_").replace("*", "\\*").replace("[", "\\[").replace("`", "\\`") \
-                        .replace("&#39;", "'").replace("&#92;", "\\").replace("&amp;", "&") \
-                        .replace("&quot;", "\"").replace("&#47;", "/").replace("&#95;", "\\_") \
-                        .replace("&#37;", "%")
+                    post_body = cleanhtml(post.comment)
 
                     links = [link_obj.group() for link_obj in post_link.finditer(post_body)]
                     for link in set(links):
