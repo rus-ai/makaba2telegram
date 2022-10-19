@@ -12,7 +12,8 @@ from telegram import Update, BotCommand
 from modules import command_thread_delete, command_group, command_thread_add
 from modules.bot_events import track_bot_chats, track_chat_members
 from modules.database import init_db, Posts, threads_cache, load_post_cache, posts_cache
-from modules.settings import BOT_TOKEN, BOT_LOG_CHAT_ID, enable_picture_preview, dir_media, command_description
+from modules.settings import BOT_TOKEN, BOT_LOG_CHAT_ID, enable_picture_preview, dir_media, timeout_polling
+from modules.settings import command_description, timeout_thread, timeout_media
 from modules.settings import sleep_time, post_link, post_url, dir_store, log_file, log_formatter
 
 
@@ -35,15 +36,24 @@ def cleanhtml(raw_html):
 def thread_request(board, thread):
     url = f'{post_url}/{board}/res/{thread}.json'
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=timeout_thread)
+    except requests.exceptions.ConnectTimeout:
+        logging.exception('Thread request: HTTP read timeout')
+        return
+    except requests.exceptions.ReadTimeout:
+        logging.exception('Thread request: HTTP read timeout')
+        return
     except requests.exceptions.Timeout:
-        logging.exception('HTTP connection timeout')
+        logging.exception('Thread request: HTTP connection timeout')
+        return
+    except TimeoutError:
+        logging.exception('Timeout Error')
         return
     except requests.exceptions.HTTPError:
-        logging.exception('Invalid HTTP response')
+        logging.exception('Thread request: Invalid HTTP response')
         return
     except requests.exceptions.ConnectionError as e:
-        logging.exception('Connection error: {}'.format(e))
+        logging.exception('Thread request: Connection error: {}'.format(e))
         return
     logging.debug(f"Status code: {r.status_code}")
     if r.status_code != 200:
@@ -66,7 +76,7 @@ def thread_request(board, thread):
 def media_request(file, path):
     url = f'{post_url}/{file}'
     try:
-        r = requests.get(url, timeout=300)
+        r = requests.get(url, timeout=timeout_media)
     except requests.exceptions.Timeout:
         logging.exception('HTTP connection timeout')
         return
@@ -186,7 +196,6 @@ def do_job_item(board, thread, chanel):
                             media_download(board, thread, str(post.num), f.path)
 
 
-
 def do_all_jobs():
     for thread in threads_cache:
         do_job_item(thread.get("board"), thread.get("thread"), thread.get("group"))
@@ -264,7 +273,7 @@ def start_telegram_bot():
     jq.run_repeating(send_bot_log, interval=60, first=10)
     while True:
         try:
-            updater.start_polling(timeout=10, allowed_updates=Update.ALL_TYPES)
+            updater.start_polling(timeout=timeout_polling, allowed_updates=Update.ALL_TYPES)
             updater.idle()
         except Exception as e:
             logging.exception(f"Exception: {e}")

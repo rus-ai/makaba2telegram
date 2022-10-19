@@ -35,3 +35,7 @@ command_description = {"start": "Start this bot",
                        "add": "Subscribe new thread to telegram group",
                        "delete": "Unsubscribe thread from telegram group",
                        }
+
+timeout_thread = 5
+timeout_media = 300
+timeout_polling = 15
