@@ -6,6 +6,8 @@ import re
 import logging
 import os
 from types import SimpleNamespace
+
+import urllib3
 from telegram.ext import Updater, CommandHandler, ChatMemberHandler, ConversationHandler
 from telegram import Update, BotCommand
 
@@ -26,10 +28,14 @@ log_message = None
 message_count = 0
 
 
+def check_dir(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+
 def create_dirs():
     for directory in all_dirs:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        check_dir(directory)
 
 
 def cleanhtml(raw_html):
@@ -49,6 +55,9 @@ def thread_request(board, thread):
     url = f'{post_url}/{board}/res/{thread}.json'
     try:
         r = requests.get(url, timeout=timeout_thread)
+    except urllib3.exceptions.ReadTimeoutError:
+        logging.exception('Thread request: HTTP read timeout')
+        return
     except requests.exceptions.ConnectTimeout:
         logging.exception('Thread request: HTTP read timeout')
         return
@@ -85,8 +94,8 @@ def thread_request(board, thread):
     return r_thread.threads[0]
 
 
-def media_request(file, path):
-    url = f'{post_url}/{file}'
+def media_request(file_url, save_path):
+    url = f'{post_url}/{file_url}'
     try:
         r = requests.get(url, timeout=timeout_media)
     except requests.exceptions.Timeout:
@@ -98,22 +107,20 @@ def media_request(file, path):
     except requests.exceptions.ConnectionError as e:
         logging.exception('Connection error: {}'.format(e))
         return
-    logging.debug(f"Download_file: {file}")
+    logging.debug(f"Download_file: {file_url}")
     logging.debug(f"Status code: {r.status_code}")
     if r.status_code != 200:
         return
-    logging.debug(f"Saving path: {path}")
-    with open(path, mode='wb') as local_file:
+    logging.debug(f"Saving path: {save_path}")
+    with open(save_path, mode='wb') as local_file:
         local_file.write(r.content)
 
 
 def media_download(board, thread, post):
-    if post.files:
-        for file in post.files:
-            directory = os.path.join(dir_media, board, thread)
-            if not os.path.exists(directory):
-                os.makedirs(directory)
-            media_request(file, os.path.join(directory, f"{post}_{file.split('/')[-1]}"))
+    for file in post.files:
+        directory = os.path.join(dir_media, board, thread)
+        check_dir(directory)
+        media_request(file.path, os.path.join(directory, f"{post.num}_{file.name}"))
 
 
 def send_telegram(text: str, channel_id: str, no_preview: bool):
@@ -201,7 +208,8 @@ def do_job_item(board, thread, chanel):
                         for thread_dict in threads_cache:
                             if thread_dict.get("thread") == thread and thread_dict.get("board") == board:
                                 thread_dict["last"] = f"{datetime.datetime.now():%y.%m.%d %H:%M:%S}"
-                    media_download(board, thread, post)
+                    if post.files:
+                        media_download(board, thread, post)
 
 
 def do_all_jobs():
