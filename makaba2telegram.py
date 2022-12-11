@@ -7,7 +7,6 @@ import logging
 import os
 from types import SimpleNamespace
 
-import urllib3
 from telegram.ext import Updater, CommandHandler, ChatMemberHandler, ConversationHandler
 from telegram import Update, BotCommand
 
@@ -55,9 +54,6 @@ def thread_request(board, thread):
     url = f'{post_url}/{board}/res/{thread}.json'
     try:
         r = requests.get(url, timeout=timeout_thread)
-    except urllib3.exceptions.ReadTimeoutError:
-        logging.exception('Thread request: HTTP read timeout')
-        return
     except requests.exceptions.ConnectTimeout:
         logging.exception('Thread request: HTTP read timeout')
         return
