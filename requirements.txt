@@ -1,3 +1,4 @@
 peewee==3.15.0
 python-dotenv==0.20.0
 requests==2.28.1
+python-telegram-bot==13.13
